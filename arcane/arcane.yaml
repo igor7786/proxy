@@ -1,0 +1,57 @@
+# # Arcane Docker Compose Configuration
+# # Generated at 5/6/2026, 5:02:19 PM
+services:
+  # =========================
+  # Docker Socket Proxy (SECURITY LAYER)
+  # =========================
+  socket-proxy:
+    image: tecnativa/docker-socket-proxy:latest
+    container_name: socket-proxy
+    restart: unless-stopped
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+    environment:
+      # Enable only what Arcane needs
+      - CONTAINERS=1 # list/inspect containers
+      - IMAGES=1 #list images
+      - NETWORKS=1 #list networks
+      - VOLUMES=1 #list volumes
+      - INFO=1 # Docker system info
+      - POST=1 # allows any POST request (start/stop/restart containers)
+      - LOGS=1  #read container logs
+      - EVENTS=1   # ← needed for container state updates
+      - EXEC=1     # ← allows docker exec into containers
+
+    networks:
+      - internal
+
+
+  # =========================
+  # Arcane (Docker UI)
+  # =========================
+  arcane:
+    image: ghcr.io/getarcaneapp/arcane:latest
+    container_name: arcane
+    restart: unless-stopped
+
+    depends_on:
+      - socket-proxy
+    volumes:
+      - ./arcane-data:/data
+
+    environment:
+      - APP_URL=https://arcane.fast-web-tech.co.uk
+      - DOCKER_HOST=tcp://socket-proxy:2375
+      - PUID=1000
+      - PGID=1000
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - LOG_LEVEL=info
+      - LOG_JSON=false
+      - OIDC_ENABLED=false
+      - DATABASE_URL=file:/data/arcane.db?_pragma=journal_mode(WAL)&_pragma=busy_timeout(2500)&_txlock=immediate
+
+    networks:
+      - internal

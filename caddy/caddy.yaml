@@ -1,0 +1,15 @@
+services:
+  npmplus-caddy:
+    container_name: npmplus-caddy
+    image: docker.io/zoeyvid/npmplus:caddy
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      - npmplus
+    ports:
+      - "80:80"
+    environment:
+      - TZ=Europe/London
+    networks:
+      - proxy

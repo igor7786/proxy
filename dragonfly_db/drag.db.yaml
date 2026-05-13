@@ -1,0 +1,27 @@
+services:
+  dragonfly:
+    image: ghcr.io/dragonflydb/dragonfly:latest
+    container_name: dragonfly
+    restart: unless-stopped
+    ulimits:
+      memlock: -1
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      - npmplus
+    # ports:
+    #   - "127.0.0.1:6379:6379"
+    volumes:
+      - ./dragonfly_data:/data
+    env_file:
+      - ../.env
+    command: >
+      --cache_mode=true
+      --maxmemory=${DRAGONFLY_MAXMEM}
+      --dir=/data
+      --dbfilename=dump
+      --port=6379
+      --snapshot_cron="0 * * * *"
+      --aclfile=/data/acl.conf
+    networks:
+      - internal

@@ -1,0 +1,28 @@
+services:
+  crowdsec:
+    container_name: crowdsec
+    image: docker.io/crowdsecurity/crowdsec:latest
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      - npmplus
+      - geoipupdate
+    ports:
+      - "127.0.0.1:8080:8080"
+    expose:
+      - "7422"
+      - "8080"
+    environment:
+      - TZ=Europe/London
+      - USE_WAL=true
+      - COLLECTIONS=ZoeyVid/npmplus
+    volumes:
+      - ./conf:/etc/crowdsec
+      - ./data:/var/lib/crowdsec/data
+      - ../npm_plus/npm_plus_data/nginx/logs:/opt/npmplus/nginx/logs:ro
+      - ../geoipupdate/geo_data/goaccess/geoip:/usr/share/GeoIP:ro
+      #      - "/opt/openappsec/logs:/opt/openappsec/logs:ro" # only uncomment if you also use the openappsec-agent container
+    networks:
+      internal:
+        ipv4_address: 172.19.0.10

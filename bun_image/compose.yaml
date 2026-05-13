@@ -1,0 +1,6 @@
+services:
+  bun-base:
+    build:
+      context: .
+      dockerfile: bun_base.dockerfile
+    image: my-bun-base:latest

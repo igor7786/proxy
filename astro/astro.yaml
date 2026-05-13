@@ -1,0 +1,25 @@
+services:
+  astro:
+    container_name: astro-app
+    image: astro-app:latest
+    build:
+      context: ../../project
+      dockerfile: ../docker/astro/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - dragonfly
+      - npmplus
+    security_opt:
+      - no-new-privileges:true
+    env_file:
+      - ../../project/.env
+    # volumes:
+      # - astro-static:/app/dist/client
+    expose:
+      - "4321"
+    networks:
+      - internal
+
+# volumes:
+#   astro-static:
+#     external: true

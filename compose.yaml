@@ -1,0 +1,41 @@
+include:
+  # - crowdsec/crowdsec.yaml
+  # - crowdsec/bouncer.yaml
+
+  # ____NPM PLUS____
+  - npm_plus/npm_plus.yaml
+  - crowdsec/crowdsec.yaml
+  - dragonfly_db/drag.db.yaml
+  - arcane/arcane.yaml
+  - caddy/caddy.yaml
+  - geoipupdate/geoipupdate.yaml
+  - redisinsight/redisinsight.yaml
+  - astro/astro.yaml
+
+networks:
+  # internal services
+  internal:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.19.0.0/16 # same as current
+  # npm + public facing
+  proxy:
+    driver: bridge
+  # external access -> stunnel, dragonfly_db
+  external:
+    driver: bridge
+
+volumes:
+  astro-static:
+    external: true
+
+# proxy_http_version 1.1;
+
+# proxy_set_header Host $host;
+# proxy_set_header X-Real-IP $remote_addr;
+# proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+# proxy_set_header X-Forwarded-Proto $scheme;
+
+# proxy_set_header Upgrade $http_upgrade;
+# proxy_set_header Connection "upgrade";
