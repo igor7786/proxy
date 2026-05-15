@@ -14,7 +14,7 @@ services:
       # - "81:81"
       # https
       - "443:443/tcp"
-      # - "443:443/udp"
+      - "443:443/udp"
       # redis
       - "6380:6380"
     networks:
