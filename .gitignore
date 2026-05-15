@@ -740,6 +740,8 @@ GIT.txt
 
 
 ### exclude ###
+!/scripts/
+!/scripts/deploy.sh
 !**/frontend/src/lib
 !/src/lib/
 !src/components/reactcomp/lib
