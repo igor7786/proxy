@@ -1,0 +1,27 @@
+ services:
+  # =========================
+  # Docker Socket Proxy (SECURITY LAYER)
+  # =========================
+  socket-proxy:
+    image: tecnativa/docker-socket-proxy:latest
+    container_name: socket-proxy
+    restart: unless-stopped
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+    environment:
+      # Enable only what Arcane needs
+      - CONTAINERS=1 # list/inspect containers
+      - IMAGES=1 #list images
+      - NETWORKS=1 #list networks
+      - VOLUMES=1 #list volumes
+      - INFO=1 # Docker system info
+      - POST=1 # allows any POST request (start/stop/restart containers)
+      - LOGS=1  #read container logs
+      - EVENTS=1   # ← needed for container state updates
+      # - EXEC=1     # ← allows docker exec into containers
+    expose:
+      - "2375"
+    networks:
+      - internal

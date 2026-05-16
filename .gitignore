@@ -730,8 +730,10 @@ GIT.txt
 **/geoipupdate/geo_data
 **/npm_plus/npm_plus_data
 **/redisinsight/redisinsight-data
-
-
+**/authentik/certs
+**/authentik/custom-templates
+**/authentik/data
+**/authentik/database
 
 
 

@@ -36,6 +36,6 @@ done
 echo "✅ Compression done"
 
 echo "🔄 Starting/restarting containers..."
-docker compose -f "$DOCKER_DIR/compose.yaml" up -d --remove-orphans
+docker compose -f "$DOCKER_DIR/compose.yaml" up --remove-orphans
 
 echo "🎉 Deploy complete!"

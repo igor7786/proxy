@@ -11,6 +11,8 @@ include:
   - geoipupdate/geoipupdate.yaml
   - redisinsight/redisinsight.yaml
   - astro/astro.yaml
+  - socket-proxy/socket-proxy.yaml
+  - authentik/authentik.yaml
 
 networks:
   # internal services

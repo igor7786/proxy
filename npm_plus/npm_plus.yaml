@@ -145,7 +145,7 @@ services:
 #      - "AUTH_REQUEST_OAUTH2PROXY_UPSTREAM=http://127.0.0.1:4180" # scheme + ip/hostname/domain (+ port) to internal oauth2proxy, without path, this is unrelated to OIDC
 #      - "AUTH_REQUEST_VOIDAUTH_UPSTREAM=http://127.0.0.1:3000" # scheme + ip/hostname/domain (+ port) to internal oauth2proxy, without path, this is unrelated to OIDC
 #      - "AUTH_REQUEST_AUTHELIA_UPSTREAM=http://127.0.0.1:9091" # scheme + ip/hostname/domain (+ port) to internal authelia, without path, this is unrelated to OIDC
-#      - "AUTH_REQUEST_AUTHENTIK_UPSTREAM=https://127.0.0.1:9443" # scheme + ip/hostname/domain (+ port) to internal authentik, without path, currently only works with embedded outpost, this is unrelated to OIDC
+      - "AUTH_REQUEST_AUTHENTIK_UPSTREAM=https://server:9443" # scheme + ip/hostname/domain (+ port) to internal authentik, without path, currently only works with embedded outpost, this is unrelated to OIDC
 
 # See the readme on how to configure your proxy hosts to use anubis and what needs to be changes in the botPolicy to make it work
 #  anubis:
