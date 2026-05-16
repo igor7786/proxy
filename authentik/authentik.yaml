@@ -50,7 +50,7 @@ services:
       postgresql:
         condition: service_healthy
     env_file:
-    - .env
+    - ../.env
     environment:
       AUTHENTIK_POSTGRESQL__HOST: postgresql
       AUTHENTIK_POSTGRESQL__NAME: ${PG_DB:-authentik}
