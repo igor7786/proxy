@@ -50,7 +50,8 @@ services:
     volumes:
       - ./npm_plus_data:/data
       - ../geoipupdate/geo_data/goaccess/geoip:/usr/share/GeoIP:ro
-      - ../../project/dist/client:/var/www/astro-static:ro
+      # for static file have to be uncoment
+      # - ../../project/dist/client:/var/www/astro-static:ro
       # - ../npm/npm_letsencrypt:/etc/letsencrypt
 #      - "/var/www:/var/www" # optional, if you want to use NPMplus directly as a webserver for html/php
       # - "../npm/letsencrypt:/etc/letsencrypt" # Only needed for initial migration from original nginx-proxy-manager to this fork, remove after migration
