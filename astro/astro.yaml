@@ -1,6 +1,6 @@
 services:
   astro:
-    container_name: astro-app
+    # container_name: astro-app  ← remove this, replicas can't share a name
     image: astro-app:latest
     build:
       context: ../../project
@@ -13,13 +13,13 @@ services:
       - no-new-privileges:true
     env_file:
       - ../../project/.env
-    # volumes:
-      # - astro-static:/app/dist/client
     expose:
       - "4321"
     networks:
-      - internal
-
-# volumes:
-#   astro-static:
-#     external: true
+      internal:
+        aliases:
+          - astro-app
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
