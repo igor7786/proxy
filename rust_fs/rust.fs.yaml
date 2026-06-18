@@ -1,0 +1,42 @@
+services:
+  rustfs_perms:
+    image: alpine:latest
+    user: root
+    volumes:
+      - ./data:/fix_path
+    command: sh -c "chown -R 10001:10001 /fix_path"
+
+  rustfs:
+    image: rustfs/rustfs:latest
+    container_name: rustfs
+    depends_on:
+      rustfs_perms:
+        condition: service_completed_successfully
+      npmplus:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+
+    restart: unless-stopped
+
+    ports:
+      - "9080:9000"   # S3 API
+      - "9081:9001"   # Web Console
+
+    environment:
+      RUSTFS_ACCESS_KEY: rustfsadmin
+      RUSTFS_SECRET_KEY: rustfsadmin
+      RUSTFS_CONSOLE_ENABLE: "true"
+
+    volumes:
+      - ./data:/data
+
+    command:
+      - --console-enable
+      - --access-key
+      - rustfsadmin
+      - --secret-key
+      - rustfsadmin
+      - /data
+    networks:
+      - internal

@@ -734,7 +734,7 @@ GIT.txt
 **/authentik/custom-templates
 **/authentik/data
 **/authentik/database
-
+**/rust_fs/data
 
 
 
