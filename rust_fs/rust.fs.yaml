@@ -26,14 +26,19 @@ services:
       RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY}
       RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY}
       RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_ADDRESS: "0.0.0.0:9000"
+      RUSTFS_CONSOLE_ADDRESS: "0.0.0.0:9001"
+      RUSTFS_CONSOLE_CORS_ALLOWED_ORIGINS: "*"
+      RUSTFS_OBS_LOGGER_LEVEL: "info"
     volumes:
       - ./data:/data
     command:
-      - --console-enable
-      - --access-key
-      - ${RUSTFS_ACCESS_KEY}
-      - --secret-key
-      - ${RUSTFS_SECRET_KEY}
       - /data
+    healthcheck:
+      test: ["CMD", "sh", "-c", "curl -fsS http://localhost:9000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - internal
