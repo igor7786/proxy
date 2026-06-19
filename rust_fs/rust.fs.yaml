@@ -5,6 +5,8 @@ services:
     volumes:
       - ./data:/fix_path
     command: sh -c "chown -R 10001:10001 /fix_path"
+    networks:
+      - internal
 
   rustfs:
     image: rustfs/rustfs:latest
@@ -12,31 +14,26 @@ services:
     depends_on:
       rustfs_perms:
         condition: service_completed_successfully
-      npmplus:
-        condition: service_healthy
+    env_file:
+      - ../.env
     security_opt:
       - no-new-privileges:true
-
     restart: unless-stopped
-
     ports:
-      - "9080:9000"   # S3 API
-      - "9081:9001"   # Web Console
-
+      - "9080:9000"
+      - "9081:9001"
     environment:
-      RUSTFS_ACCESS_KEY: rustfsadmin
-      RUSTFS_SECRET_KEY: rustfsadmin
+      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY}
+      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY}
       RUSTFS_CONSOLE_ENABLE: "true"
-
     volumes:
       - ./data:/data
-
     command:
       - --console-enable
       - --access-key
-      - rustfsadmin
+      - ${RUSTFS_ACCESS_KEY}
       - --secret-key
-      - rustfsadmin
+      - ${RUSTFS_SECRET_KEY}
       - /data
     networks:
       - internal
