@@ -20,7 +20,7 @@ services:
     networks:
       proxy:        # leave dynamic
       internal:
-        ipv4_address: 172.19.0.11
+        ipv4_address: 172.19.0.100
 
 
 #    ipc: host # required when you want to use the openappsec attachment module

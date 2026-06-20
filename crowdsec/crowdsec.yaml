@@ -25,4 +25,4 @@ services:
       #      - "/opt/openappsec/logs:/opt/openappsec/logs:ro" # only uncomment if you also use the openappsec-agent container
     networks:
       internal:
-        ipv4_address: 172.19.0.10
+        ipv4_address: 172.19.0.101
