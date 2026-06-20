@@ -14,7 +14,7 @@ include:
   - socket-proxy/socket-proxy.yaml
   - authentik/authentik.yaml
   - rust_fs/rust.fs.yaml
-  # - redpanda/redpanda.yaml
+  - redpanda/redpanda.yaml
 
 networks:
   # internal services

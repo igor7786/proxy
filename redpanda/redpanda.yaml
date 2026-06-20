@@ -1,51 +1,6 @@
-# services:
-#   redpanda:
-#     image: docker.redpanda.com/redpandadata/redpanda:v24.1.1
-#     container_name: redpanda
-#     command:
-#       - redpanda start
-#       - --overprovisioned
-#       - --smp 1
-#       - --memory 1G
-#       - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
-#       - --advertise-kafka-addr internal://redpanda:9092,external://localhost:19092
-#       - --pandaproxy-addr 0.0.0.0:8082
-#       - --advertise-pandaproxy-addr localhost:8082
-#     ports:
-#       - "19092:19092"
-#       - "8082:8082"
-#       - "8081:8081"
-#     networks:
-#       - internal   # ← add this
-
-#   redpanda-console:
-#     image: docker.redpanda.com/redpandadata/console:latest
-#     container_name: redpanda-console
-#     entrypoint: /bin/sh -c "echo \"$$CONSOLE_CONFIG_FILE\" > /tmp/config.yml && /app/console"
-#     environment:
-#       CONFIG_FILEPATH: /tmp/config.yml
-#       CONSOLE_CONFIG_FILE: |
-#         kafka:
-#           brokers: ["redpanda:9092"]
-#     ports:
-#       - "8085:8080"
-#     depends_on:
-#       - redpanda
-    # networks:
-    #   internal:
-    #     ipv4_address: 172.19.0.13
-
-
-
-# docker/redpanda.yml
-volumes:
-  redpanda-0: null
-  redpanda-1: null
-  redpanda-2: null
-
 services:
   redpanda-0:
-    image: docker.redpanda.com/redpandadata/redpanda:v26.1.10
+    image: docker.redpanda.com/redpandadata/redpanda:v24.3.14
     container_name: redpanda-0
     command:
       - redpanda
@@ -60,12 +15,26 @@ services:
       - --mode dev-container
       - --smp 1
       - --default-log-level=info
+    environment:
+      - RPK_ADMIN_HOSTS=redpanda-0:9644,redpanda-1:9644,redpanda-2:9644
+    ports:
+      - "19092:19092"
+      - "18082:18082"
+      - "18081:18081"
+      - "19644:9644"
     volumes:
-      - redpanda-0:/var/lib/redpanda/data
+      - ./data/rp0:/var/lib/redpanda/data
+    cap_add:
+      - SYS_NICE
+    deploy:
+      resources:
+        limits:
+          memory: 1.5G
+        reservations:
+          memory: 1G
     networks:
       internal:
         ipv4_address: 172.19.0.20
-
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "rpk cluster health | grep -q 'Healthy:.*true'"]
@@ -75,7 +44,7 @@ services:
       start_period: 30s
 
   redpanda-1:
-    image: docker.redpanda.com/redpandadata/redpanda:v26.1.10
+    image: docker.redpanda.com/redpandadata/redpanda:v24.3.14
     container_name: redpanda-1
     command:
       - redpanda
@@ -91,18 +60,33 @@ services:
       - --smp 1
       - --default-log-level=info
       - --seeds redpanda-0:33145
+    environment:
+      - RPK_ADMIN_HOSTS=redpanda-0:9644,redpanda-1:9644,redpanda-2:9644
+    ports:
+      - "29092:29092"
+      - "28082:28082"
+      - "28081:28081"
+      - "29644:9644"
     volumes:
-      - redpanda-1:/var/lib/redpanda/data
+      - ./data/rp1:/var/lib/redpanda/data
+    cap_add:
+      - SYS_NICE
+    deploy:
+      resources:
+        limits:
+          memory: 1.5G
+        reservations:
+          memory: 1G
     networks:
       internal:
         ipv4_address: 172.19.0.21
     restart: unless-stopped
     depends_on:
       redpanda-0:
-        condition: service_healthy
+        condition: service_started
 
   redpanda-2:
-    image: docker.redpanda.com/redpandadata/redpanda:v26.1.10
+    image: docker.redpanda.com/redpandadata/redpanda:v24.3.14
     container_name: redpanda-2
     command:
       - redpanda
@@ -118,18 +102,33 @@ services:
       - --smp 1
       - --default-log-level=info
       - --seeds redpanda-0:33145
+    environment:
+      - RPK_ADMIN_HOSTS=redpanda-0:9644,redpanda-1:9644,redpanda-2:9644
+    ports:
+      - "39092:39092"
+      - "38082:38082"
+      - "38081:38081"
+      - "39644:9644"
     volumes:
-      - redpanda-2:/var/lib/redpanda/data
+      - ./data/rp2:/var/lib/redpanda/data
+    cap_add:
+      - SYS_NICE
+    deploy:
+      resources:
+        limits:
+          memory: 1.5G
+        reservations:
+          memory: 1G
     networks:
       internal:
-        ipv4_address: 172.19.0.22
+        ipv4_address: 172.19.0.23
     restart: unless-stopped
     depends_on:
       redpanda-0:
-        condition: service_healthy
+        condition: service_started
 
   redpanda-console:
-    image: docker.redpanda.com/redpandadata/console:v3.7.3
+    image: docker.redpanda.com/redpandadata/console:v2.8.5
     container_name: redpanda-console
     entrypoint: /bin/sh
     command: -c 'echo "$$CONSOLE_CONFIG_FILE" > /tmp/config.yml; /app/console'
@@ -138,16 +137,21 @@ services:
       CONSOLE_CONFIG_FILE: |
         kafka:
           brokers: ["redpanda-0:9092", "redpanda-1:9092", "redpanda-2:9092"]
-        schemaRegistry:
-          enabled: true
-          urls: ["http://redpanda-0:8081"]
+          schemaRegistry:
+            enabled: true
+            urls: ["http://redpanda-0:8081", "http://redpanda-1:8081", "http://redpanda-2:8081"]
         redpanda:
           adminApi:
             enabled: true
-            urls: ["http://redpanda-0:9644"]
+            urls: ["http://redpanda-0:9644", "http://redpanda-1:9644", "http://redpanda-2:9644"]
+    deploy:
+      resources:
+        limits:
+          memory: 500M
     networks:
       internal:
-        ipv4_address: 172.19.0.23
+        ipv4_address: 172.19.0.24
+      proxy:
     restart: unless-stopped
     ports:
       - "8085:8080"
@@ -155,17 +159,22 @@ services:
       redpanda-0:
         condition: service_healthy
 
-  # tinybird:
-  #   image: tinybirdco/tinybird-local:latest
-  #   container_name: tinybird
-  #   platform: linux/amd64
-  #   ports:
-  #     - "7181:7181"
-  #   volumes:
-  #     - ./data/clickhouse:/var/lib/clickhouse
-  #     - ./data/metadata:/redis-data
-  #   restart: unless-stopped
-  #   depends_on:
-  #     - redpanda
-  #   networks:
-  #     - internal
+
+
+  tinybird:
+    image: tinybirdco/tinybird-local:latest
+    container_name: tinybird
+    platform: linux/amd64
+    ports:
+      - "7181:7181"
+    volumes:
+      - ./data/clickhouse:/var/lib/clickhouse
+      - ./data/metadata:/redis-data
+    restart: unless-stopped
+    depends_on:
+      redpanda-0:
+        condition: service_healthy
+    networks:
+      internal:
+        ipv4_address: 172.19.0.25 # Assigned a unique static IP in your subnet range
+
