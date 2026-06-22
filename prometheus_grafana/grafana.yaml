@@ -11,8 +11,8 @@ services:
           condition: service_healthy
         dragonfly:
           condition: service_healthy
-      ports:
-        - "9090:9090"
+      # ports:
+      #   - "9090:9090"
       networks:
         - internal
 
@@ -24,7 +24,7 @@ services:
       - ./data:/var/lib/grafana
     depends_on:
       - prometheus
-    ports:
-      - "3000:3000"
+    # ports:
+    #   - "3000:3000"
     networks:
       - internal
