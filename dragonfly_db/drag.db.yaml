@@ -11,6 +11,7 @@ services:
       - npmplus
     ports:
       - "127.0.0.1:6379:6379"
+      - "127.0.0.1:9091:9091"
     volumes:
       - ./dragonfly_data:/data
     env_file:
@@ -23,5 +24,21 @@ services:
       --port=6379
       --snapshot_cron="0 * * * *"
       --aclfile=/data/acl.conf
+      --proactor_threads=2
+      --force_epoll=false
+      --admin_port=9091
+    # The ACL-compatible health check configuration
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "6379", "--no-auth-warning",
+             "--user", "healthchecker", "-a", "${Health_Check}", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: "2.0"
     networks:
       - internal

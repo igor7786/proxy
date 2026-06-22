@@ -1,0 +1,30 @@
+services:
+  prometheus:
+      image: prom/prometheus:latest
+      container_name: prometheus
+      restart: unless-stopped
+      volumes:
+        - ./prometheus.yaml:/etc/prometheus/prometheus.yml
+        - ./prometheus_data:/prometheus
+      depends_on:
+        redpanda-0:
+          condition: service_healthy
+        dragonfly:
+          condition: service_healthy
+      ports:
+        - "9090:9090"
+      networks:
+        - internal
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    volumes:
+      - ./data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    networks:
+      - internal

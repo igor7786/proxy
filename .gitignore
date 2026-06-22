@@ -738,7 +738,8 @@ GIT.txt
 **/redpanda/data
 **/connections
 **/datasources
-
+**/prometheus_grafana/data
+**/prometheus_grafana/prometheus_data
 
 ### exclude ###
 !/scripts/
