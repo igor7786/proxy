@@ -15,8 +15,14 @@ services:
       - --mode dev-container
       - --smp 1
       - --default-log-level=info
+      # --- ADD THESE TWO LINES TO SECURE BOTH APIS ---
+      - --set redpanda.admin_api_require_auth=true
+      - --set redpanda.enable_sasl=true
+      - --set
+      - 'redpanda.superusers=["superuser"]'
     environment:
       - RPK_ADMIN_HOSTS=redpanda-0:9644,redpanda-1:9644,redpanda-2:9644
+      - RP_BOOTSTRAP_USER=superuser:secretpassword
     ports:
       - "19092:19092"
       - "18082:18082"
@@ -37,7 +43,8 @@ services:
         ipv4_address: 172.19.0.20
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "rpk cluster health | grep -q 'Healthy:.*true'"]
+       # Inject the bootstrap user authentication flags directly into rpk
+      test: ["CMD-SHELL", "rpk cluster health -X user=superuser -X pass=secretpassword | grep -q 'Healthy:.*true'"]
       interval: 15s
       timeout: 10s
       retries: 5
@@ -60,8 +67,14 @@ services:
       - --smp 1
       - --default-log-level=info
       - --seeds redpanda-0:33145
+      # --- ADD THESE TWO LINES TO SECURE BOTH APIS ---
+      - --set redpanda.admin_api_require_auth=true
+      - --set redpanda.enable_sasl=true
+      - --set
+      - 'redpanda.superusers=["superuser"]'
     environment:
       - RPK_ADMIN_HOSTS=redpanda-0:9644,redpanda-1:9644,redpanda-2:9644
+      - RP_BOOTSTRAP_USER=superuser:secretpassword
     ports:
       - "29092:29092"
       - "28082:28082"
@@ -102,8 +115,14 @@ services:
       - --smp 1
       - --default-log-level=info
       - --seeds redpanda-0:33145
+      # --- ADD THESE TWO LINES TO SECURE BOTH APIS ---
+      - --set redpanda.admin_api_require_auth=true
+      - --set redpanda.enable_sasl=true
+      - --set
+      - 'redpanda.superusers=["superuser"]'
     environment:
       - RPK_ADMIN_HOSTS=redpanda-0:9644,redpanda-1:9644,redpanda-2:9644
+      - RP_BOOTSTRAP_USER=superuser:secretpassword
     ports:
       - "39092:39092"
       - "38082:38082"
@@ -137,6 +156,13 @@ services:
       CONSOLE_CONFIG_FILE: |
         kafka:
           brokers: ["redpanda-0:9092", "redpanda-1:9092", "redpanda-2:9092"]
+           # --- ADD THIS SASL BLOCK TO AUTHENTICATE ---
+          sasl:
+            enabled: true
+            mechanism: SCRAM-SHA-256
+            username: "superuser"
+            password: "secretpassword"
+          # ------------------------------------------
           schemaRegistry:
             enabled: true
             urls: ["http://redpanda-0:8081", "http://redpanda-1:8081", "http://redpanda-2:8081"]
@@ -144,6 +170,10 @@ services:
           adminApi:
             enabled: true
             urls: ["http://redpanda-0:9644", "http://redpanda-1:9644", "http://redpanda-2:9644"]
+            # --- ADD ADMIN API CREDENTIALS TOO ---
+            username: "superuser"
+            password: "secretpassword"
+            # -------------------------------------
     deploy:
       resources:
         limits:
@@ -160,21 +190,19 @@ services:
         condition: service_healthy
 
 
-
-  tinybird:
-    image: tinybirdco/tinybird-local:latest
-    container_name: tinybird
-    platform: linux/amd64
-    ports:
-      - "7181:7181"
-    volumes:
-      - ./data/clickhouse:/var/lib/clickhouse
-      - ./data/metadata:/redis-data
-    restart: unless-stopped
-    depends_on:
-      redpanda-0:
-        condition: service_healthy
-    networks:
-      internal:
-        ipv4_address: 172.19.0.25 # Assigned a unique static IP in your subnet range
-
+  # tinybird:
+  #   image: tinybirdco/tinybird-local:latest
+  #   container_name: tinybird
+  #   platform: linux/amd64
+  #   ports:
+  #     - "7181:7181"
+  #   volumes:
+  #     - ./data/clickhouse:/var/lib/clickhouse
+  #     - ./data/metadata:/redis-data
+  #   restart: unless-stopped
+  #   depends_on:
+  #     redpanda-0:
+  #       condition: service_healthy
+  #   networks:
+  #     internal:
+  #       ipv4_address: 172.19.0.25

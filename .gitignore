@@ -736,6 +736,8 @@ GIT.txt
 **/authentik/database
 **/rust_fs/data
 **/redpanda/data
+**/connections
+**/datasources
 
 
 ### exclude ###
