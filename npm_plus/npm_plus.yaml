@@ -17,6 +17,11 @@ services:
       - "443:443/udp"
       # redis
       - "6380:6380"
+      # redpanda
+      - "9093:9093"
+      - "9094:9094"
+      - "9095:9095"
+
     networks:
       proxy:        # leave dynamic
       internal:
