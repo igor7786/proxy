@@ -27,7 +27,7 @@ services:
       - --reserve-memory 0M
       - --node-id 0                            # Locked Identity
       - --seeds redpanda-0:33145,redpanda-1:33145,redpanda-2:33145
-    image: docker.redpanda.com/redpandadata/redpanda:v26.1.11
+    image: docker.redpanda.com/redpandadata/redpanda:v26.1.12
     container_name: redpanda-0
     # Sets the username and password of the bootstrap SCRAM superuser
     # See https://docs.redpanda.com/current/deploy/deployment-option/self-hosted/manual/production/production-deployment/#bootstrap-a-user-account
@@ -74,7 +74,7 @@ services:
       - --reserve-memory 0M
       - --node-id 1                            # Locked Identity
       - --seeds redpanda-0:33145,redpanda-1:33145,redpanda-2:33145
-    image: docker.redpanda.com/redpandadata/redpanda:v26.1.11
+    image: docker.redpanda.com/redpandadata/redpanda:v26.1.12
     container_name: redpanda-1
     restart: unless-stopped
     environment:
@@ -120,7 +120,7 @@ services:
       - --reserve-memory 0M
       - --node-id 2                            # Locked Identity
       - --seeds redpanda-0:33145,redpanda-1:33145,redpanda-2:33145
-    image: docker.redpanda.com/redpandadata/redpanda:v26.1.11
+    image: docker.redpanda.com/redpandadata/redpanda:v26.1.12
     container_name: redpanda-2
     restart: unless-stopped
     environment:
@@ -155,14 +155,41 @@ services:
   ####################
   console:
     container_name: redpanda-console
-    image: docker.redpanda.com/redpandadata/console:v3.7.4
-    restart: unless-stopped
+    image: docker.redpanda.com/redpandadata/console:v3.8.0
     networks:
       - redpanda_network
+
+    entrypoint: /bin/sh
+    command: -c 'echo "$$CONSOLE_CONFIG_FILE" > /tmp/config.yml && /app/console'
+
     environment:
-      CONFIG_FILEPATH: /etc/console/config.yml
-    volumes:
-      - ./data/config.yml:/etc/console/config.yml:ro
+      CONFIG_FILEPATH: ${CONFIG_FILEPATH:-/tmp/config.yml}
+
+      CONSOLE_CONFIG_FILE: |
+        kafka:
+          brokers: ["redpanda-0:9092", "redpanda-1:9092", "redpanda-2:9092"]
+          sasl:
+            enabled: true
+            username: superuser
+            password: secretpassword
+            mechanism: SCRAM-SHA-256
+
+        schemaRegistry:
+          enabled: true
+          urls: [ "http://redpanda-0:8081", "http://redpanda-1:8081", "http://redpanda-2:8081" ]
+          authentication:
+            basic:
+              username: superuser
+              password: secretpassword
+
+        redpanda:
+          adminApi:
+            enabled: true
+            urls: ["http://redpanda-0:9644", "http://redpanda-1:9644", "http://redpanda-2:9644"]
+            authentication:
+              basic:
+                username: superuser
+                password: secretpassword
     ports:
       - 8085:8080
     healthcheck:
