@@ -7,8 +7,9 @@ services:
       dockerfile: ../docker/astro/Dockerfile
     restart: unless-stopped
     depends_on:
-      - dragonfly
-      - npmplus
+      dragonfly:
+        condition: service_healthy
+      # - npmplus
     security_opt:
       - no-new-privileges:true
     env_file:
@@ -19,6 +20,19 @@ services:
       internal:
         aliases:
           - astro-app
+      redpanda_network:
+        aliases:
+          - astro-app
+    healthcheck:
+      test:
+        - "CMD"
+        - "node"
+        - "-e"
+        - "require('net').connect(4321,'127.0.0.1').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
     deploy:
       replicas: 3
       restart_policy:

@@ -1,7 +1,4 @@
 include:
-  # - crowdsec/crowdsec.yaml
-  # - crowdsec/bouncer.yaml
-
   # ____NPM PLUS____
   - npm_plus/npm_plus.yaml
   - crowdsec/crowdsec.yaml
@@ -24,11 +21,13 @@ networks:
     ipam:
       config:
         - subnet: 172.19.0.0/24 # same as current
+  redpanda_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.1.0/24
   # npm + public facing
   proxy:
-    driver: bridge
-  # external access -> stunnel, dragonfly_db
-  external:
     driver: bridge
 
 volumes:

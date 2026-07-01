@@ -1,37 +1,54 @@
+name: redpanda-quickstart-multi-broker
+
 services:
   redpanda-0:
-    image: docker.redpanda.com/redpandadata/redpanda:v26.1.9
-    container_name: redpanda-0
     command:
       - redpanda
       - start
       - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
-      - --advertise-kafka-addr internal://redpanda-0:9092,external://rp-0.fast-web-tech.co.uk:9093
+      # Address the broker advertises to clients that connect to the Kafka API.
+      # Use the internal addresses to connect to the Redpanda brokers
+      # from inside the same Docker network.
+      # Use the external addresses to connect to the Redpanda brokers
+      # from outside the Docker network.
+      - --advertise-kafka-addr internal://redpanda-0:9092,external://rp-0.fast-web-tech.co.uk:19093
       - --pandaproxy-addr internal://0.0.0.0:8082,external://0.0.0.0:18082
+      # Address the broker advertises to clients that connect to the HTTP Proxy.
       - --advertise-pandaproxy-addr internal://redpanda-0:8082,external://localhost:18082
       - --schema-registry-addr internal://0.0.0.0:8081,external://0.0.0.0:18081
-      - --rpc-addr redpanda-0:33145
+      # Redpanda brokers use the RPC API to communicate with each other internally.
+      - --rpc-addr 0.0.0.0:33145
       - --advertise-rpc-addr redpanda-0:33145
-      - --mode dev-container
-      - --smp 1
+      # # Mode dev-container uses well-known configuration properties for development in containers.
+      - --overprovisioned
+      # Tells Seastar (the framework Redpanda uses under the hood) to use 1 core on the system.
       - --default-log-level=info
-      # --- ADD THESE TWO LINES TO SECURE BOTH APIS ---
-      - --set redpanda.admin_api_require_auth=true
-      - --set redpanda.enable_sasl=true
-      - --set
-      - 'redpanda.superusers=["superuser"]'
-      - --node-id 0
-
+      - --smp 1
+      - --reserve-memory 0M
+      - --node-id 0                            # Locked Identity
+      - --seeds redpanda-0:33145,redpanda-1:33145,redpanda-2:33145
+    image: docker.redpanda.com/redpandadata/redpanda:v26.1.11
+    container_name: redpanda-0
+    # Sets the username and password of the bootstrap SCRAM superuser
+    # See https://docs.redpanda.com/current/deploy/deployment-option/self-hosted/manual/production/production-deployment/#bootstrap-a-user-account
+    restart: unless-stopped
     environment:
-      - RPK_ADMIN_HOSTS=redpanda-0:9644,redpanda-1:9644,redpanda-2:9644
-      - RP_BOOTSTRAP_USER=superuser:secretpassword
-    ports:
-      - "19092:19092"
-      - "18082:18082"
-      - "18081:18081"
-      - "19644:9644"
+      RP_BOOTSTRAP_USER: "superuser:secretpassword"
     volumes:
       - ./data/rp0:/var/lib/redpanda/data
+      - ./data/bootstrap.yml:/etc/redpanda/.bootstrap.yaml
+    networks:
+      - redpanda_network
+    ports:
+      - 18081:18081
+      - 18082:18082
+      - 19092:19092
+      - 19644:9644
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "-u", "superuser:secretpassword", "http://localhost:9644/v1/brokers"]
+      interval: 10s
+      timeout: 15s
+      retries: 10
     cap_add:
       - SYS_NICE
     deploy:
@@ -40,51 +57,43 @@ services:
           memory: 1.5G
         reservations:
           memory: 1G
-    networks:
-      internal:
-        ipv4_address: 172.19.0.20
-    restart: unless-stopped
-    # redpanda-0 healthcheck
-    healthcheck:
-      test: ["CMD", "rpk", "cluster", "info", "-X", "user=superuser", "-X", "pass=secretpassword"]
-      interval: 15s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
-
   redpanda-1:
-    image: docker.redpanda.com/redpandadata/redpanda:v26.1.9
-    container_name: redpanda-1
     command:
       - redpanda
       - start
       - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:29092
-      - --advertise-kafka-addr internal://redpanda-1:9092,external://rp-1.fast-web-tech.co.uk:9094
+      - --advertise-kafka-addr internal://redpanda-1:9092,external://rp-1.fast-web-tech.co.uk:29093
       - --pandaproxy-addr internal://0.0.0.0:8082,external://0.0.0.0:28082
       - --advertise-pandaproxy-addr internal://redpanda-1:8082,external://localhost:28082
       - --schema-registry-addr internal://0.0.0.0:8081,external://0.0.0.0:28081
-      - --rpc-addr redpanda-1:33145
+      - --rpc-addr 0.0.0.0:33145
       - --advertise-rpc-addr redpanda-1:33145
-      - --mode dev-container
-      - --smp 1
+      - --overprovisioned
       - --default-log-level=info
-      - --seeds redpanda-0:33145
-      # --- ADD THESE TWO LINES TO SECURE BOTH APIS ---
-      - --set redpanda.admin_api_require_auth=true
-      - --set redpanda.enable_sasl=true
-      - --set
-      - 'redpanda.superusers=["superuser"]'
-      - --node-id 1
+      - --smp 1
+      - --reserve-memory 0M
+      - --node-id 1                            # Locked Identity
+      - --seeds redpanda-0:33145,redpanda-1:33145,redpanda-2:33145
+    image: docker.redpanda.com/redpandadata/redpanda:v26.1.11
+    container_name: redpanda-1
+    restart: unless-stopped
     environment:
-      - RPK_ADMIN_HOSTS=redpanda-0:9644,redpanda-1:9644,redpanda-2:9644
-      - RP_BOOTSTRAP_USER=superuser:secretpassword
-    ports:
-      - "29092:29092"
-      - "28082:28082"
-      - "28081:28081"
-      - "29644:9644"
+      RP_BOOTSTRAP_USER: "superuser:secretpassword"
     volumes:
       - ./data/rp1:/var/lib/redpanda/data
+      - ./data/bootstrap.yml:/etc/redpanda/.bootstrap.yaml
+    networks:
+      - redpanda_network
+    ports:
+      - 28081:28081
+      - 28082:28082
+      - 29092:29092
+      - 29644:9644
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "-u", "superuser:secretpassword", "http://localhost:9644/v1/brokers"]
+      interval: 10s
+      timeout: 15s
+      retries: 10
     cap_add:
       - SYS_NICE
     deploy:
@@ -93,47 +102,45 @@ services:
           memory: 1.5G
         reservations:
           memory: 1G
-    networks:
-      internal:
-        ipv4_address: 172.19.0.21
-    restart: unless-stopped
-    depends_on:
-      redpanda-0:
-        condition: service_healthy
 
   redpanda-2:
-    image: docker.redpanda.com/redpandadata/redpanda:v26.1.9
-    container_name: redpanda-2
     command:
       - redpanda
       - start
       - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:39092
-      - --advertise-kafka-addr internal://redpanda-2:9092,external://rp-2.fast-web-tech.co.uk:9095
+      - --advertise-kafka-addr internal://redpanda-2:9092,external://rp-2.fast-web-tech.co.uk:39093
       - --pandaproxy-addr internal://0.0.0.0:8082,external://0.0.0.0:38082
       - --advertise-pandaproxy-addr internal://redpanda-2:8082,external://localhost:38082
       - --schema-registry-addr internal://0.0.0.0:8081,external://0.0.0.0:38081
-      - --rpc-addr redpanda-2:33145
+      - --rpc-addr 0.0.0.0:33145
       - --advertise-rpc-addr redpanda-2:33145
-      - --mode dev-container
-      - --smp 1
+      - --overprovisioned
       - --default-log-level=info
-      - --seeds redpanda-0:33145
-      # --- ADD THESE TWO LINES TO SECURE BOTH APIS ---
-      - --set redpanda.admin_api_require_auth=true
-      - --set redpanda.enable_sasl=true
-      - --set
-      - 'redpanda.superusers=["superuser"]'
-      - --node-id 2
+      - --smp 1
+      - --reserve-memory 0M
+      - --node-id 2                            # Locked Identity
+      - --seeds redpanda-0:33145,redpanda-1:33145,redpanda-2:33145
+    image: docker.redpanda.com/redpandadata/redpanda:v26.1.11
+    container_name: redpanda-2
+    restart: unless-stopped
     environment:
-      - RPK_ADMIN_HOSTS=redpanda-0:9644,redpanda-1:9644,redpanda-2:9644
-      - RP_BOOTSTRAP_USER=superuser:secretpassword
-    ports:
-      - "39092:39092"
-      - "38082:38082"
-      - "38081:38081"
-      - "39644:9644"
+      RP_BOOTSTRAP_USER: "superuser:secretpassword"
     volumes:
       - ./data/rp2:/var/lib/redpanda/data
+      - ./data/bootstrap.yml:/etc/redpanda/.bootstrap.yaml
+
+    networks:
+      - redpanda_network
+    ports:
+      - 38081:38081
+      - 38082:38082
+      - 39092:39092
+      - 39644:9644
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "-u", "superuser:secretpassword", "http://localhost:9644/v1/brokers"]
+      interval: 10s
+      timeout: 15s
+      retries: 10
     cap_add:
       - SYS_NICE
     deploy:
@@ -142,73 +149,36 @@ services:
           memory: 1.5G
         reservations:
           memory: 1G
-    networks:
-      internal:
-        ipv4_address: 172.19.0.23
+
+  ####################
+  # Redpanda Console #
+  ####################
+  console:
+    container_name: redpanda-console
+    image: docker.redpanda.com/redpandadata/console:v3.7.4
     restart: unless-stopped
+    networks:
+      - redpanda_network
+    environment:
+      CONFIG_FILEPATH: /etc/console/config.yml
+    volumes:
+      - ./data/config.yml:/etc/console/config.yml:ro
+    ports:
+      - 8085:8080
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 8080 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
     depends_on:
       redpanda-0:
         condition: service_healthy
-
-  redpanda-console:
-    image: docker.redpanda.com/redpandadata/console:v3.7.4
-    container_name: redpanda-console
-    entrypoint: /bin/sh
-    command: -c 'echo "$$CONSOLE_CONFIG_FILE" > /tmp/config.yml; /app/console'
-    environment:
-      CONFIG_FILEPATH: /tmp/config.yml
-      CONSOLE_CONFIG_FILE: |
-        kafka:
-          brokers: ["redpanda-0:9092", "redpanda-1:9092", "redpanda-2:9092"]
-          sasl:
-            enabled: true
-            mechanism: SCRAM-SHA-256
-            username: "superuser"
-            password: "secretpassword"
-
-        # MOVE THIS TO THE ROOT BLOCK (OUTSIDE KAFKA)
-        schemaRegistry:
-          enabled: true
-          urls: ["http://redpanda-0:8081", "http://redpanda-1:8081", "http://redpanda-2:8081"]
-
-        redpanda:
-          adminApi:
-            enabled: true
-            urls: ["http://redpanda-0:9644", "http://redpanda-1:9644", "http://redpanda-2:9644"]
-            # WRAP CREDENTIALS IN THE BASIC AUTHENTICATION BLOCK
-            authentication:
-              basic:
-                username: "superuser"
-                password: "secretpassword"
+      redpanda-1:
+        condition: service_healthy
+      redpanda-2:
+        condition: service_healthy
     deploy:
       resources:
         limits:
           memory: 500M
-    networks:
-      internal:
-        ipv4_address: 172.19.0.24
-      proxy:
-    restart: unless-stopped
-    ports:
-      - "8085:8080"
-    depends_on:
-      redpanda-0:
-        condition: service_healthy
-
-
-  # tinybird:
-  #   image: tinybirdco/tinybird-local:latest
-  #   container_name: tinybird
-  #   platform: linux/amd64
-  #   ports:
-  #     - "7181:7181"
-  #   volumes:
-  #     - ./data/clickhouse:/var/lib/clickhouse
-  #     - ./data/metadata:/redis-data
-  #   restart: unless-stopped
-  #   depends_on:
-  #     redpanda-0:
-  #       condition: service_healthy
-  #   networks:
-  #     internal:
-  #       ipv4_address: 172.19.0.25

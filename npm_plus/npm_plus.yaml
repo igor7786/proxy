@@ -18,12 +18,18 @@ services:
       # redis
       - "6380:6380"
       # redpanda
-      - "9093:9093"
-      - "9094:9094"
-      - "9095:9095"
+      - "19093:19093"
+      - "29093:29093"
+      - "39093:39093"
+    depends_on:
+      console:
+        condition: service_healthy
+      astro:
+        condition: service_healthy
 
     networks:
       proxy:        # leave dynamic
+      redpanda_network: # leave dynamic
       internal:
         ipv4_address: 172.19.0.100
 
