@@ -741,6 +741,7 @@ GIT.txt
 **/prometheus_grafana/data
 **/prometheus_grafana/prometheus_data
 **/tls
+**/pg/data
 
 ### exclude ###
 !/scripts/
