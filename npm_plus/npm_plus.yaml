@@ -21,6 +21,7 @@ services:
       - "19093:19093"
       - "29093:29093"
       - "39093:39093"
+      - "5432:5432"
     depends_on:
       console:
         condition: service_healthy
@@ -48,6 +49,7 @@ services:
       - FOWNER # required if you change PUID/PGID
       - DAC_OVERRIDE # required if you change PUID/PGID
 #      - NET_RAW # required if you need the ping command inside the NPMplus container
+      - KILL # required for tini/init to forward signals to processes running under PUID/PGID
     security_opt:
       - no-new-privileges:true
 #    dns: # only set this if you need/want to override the default DNS server

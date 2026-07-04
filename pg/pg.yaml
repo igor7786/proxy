@@ -3,21 +3,37 @@ services:
     container_name: postgresql
     image: docker.io/library/postgres:17.9
     restart: unless-stopped
+    command:
+      - postgres
+      - -c
+      - ssl=on
+      - -c
+      - ssl_cert_file=/etc/postgresql-certs/postgres-server.crt
+      - -c
+      - ssl_key_file=/etc/postgresql-certs/postgres-server.key
+      - -c
+      - ssl_ca_file=/etc/postgresql-certs/ca.crt
     env_file:
       - ../.env
     environment:
-      POSTGRES_USER: ${PG_ADMIN_USER:-pgadmin}
+      POSTGRES_USER: ${PG_ADMIN_USER}
       POSTGRES_PASSWORD: ${PG_ADMIN_PASS:?admin password required}
     volumes:
       - ./data:/var/lib/postgresql/data
       - ./init:/docker-entrypoint-initdb.d:ro
+      - ./tls/postgres-server.crt:/etc/postgresql-certs/postgres-server.crt:ro
+      - ./tls/postgres-server.key:/etc/postgresql-certs/postgres-server.key:ro
+      - ./tls/ca.crt:/etc/postgresql-certs/ca.crt:ro
+      - ./config/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
+    ports:
+    - "5433:5432"
     healthcheck:
       interval: 30s
       retries: 5
       start_period: 20s
       test:
         - CMD-SHELL
-        - pg_isready -U ${PG_ADMIN_USER:-pgadmin}
+        - pg_isready -U ${PG_ADMIN_USER:?admin user required} -d ${PG_DB:?database name required}
       timeout: 5s
     networks:
       - internal
