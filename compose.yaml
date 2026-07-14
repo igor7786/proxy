@@ -12,7 +12,6 @@ include:
   - authentik/authentik.yaml
   - rust_fs/rust.fs.yaml
   - redpanda/redpanda.yaml
-  - prometheus_grafana/grafana.yaml
   - pg/pg.yaml
 
 networks:
