@@ -15,9 +15,10 @@ services:
     env_file:
       - ../../project/.env
     volumes:
-      - ../../../ca/certs/ca.crt:/app/.certs/ca.crt:ro
-      - ../../../ca/certs/homepc.crt:/app/.certs/homepc.crt:ro
-      - ../../../ca/certs/homepc.key:/app/.certs/homepc.key:ro
+      # - ../../../ca/certs/ca.crt:/app/.certs/ca.crt:ro
+      # - ../../../ca/certs/homepc.crt:/app/.certs/homepc.crt:ro
+      # - ../../../ca/certs/homepc.key:/app/.certs/homepc.key:ro
+      - ./data/sqlite:/app/data/sqlite
     expose:
       - "4321"
     networks:

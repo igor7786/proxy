@@ -742,6 +742,9 @@ GIT.txt
 **/prometheus_grafana/prometheus_data
 **/tls
 **/pg/data
+### Sqlite ###
+**/astro/data/sqlite/sqlite.db-shm
+**/astro/data/sqlite/sqlite.db-wal
 
 ### exclude ###
 !/scripts/
@@ -753,5 +756,6 @@ GIT.txt
 !**/src/scripts
 !src/lib/env
 !.example.env
+
 
 
