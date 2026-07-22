@@ -9,6 +9,12 @@ services:
     depends_on:
       dragonfly:
         condition: service_healthy
+      postgresql:
+        condition: service_healthy
+      rustfs:
+        condition: service_healthy
+      console:
+        condition: service_healthy
       # - npmplus
     security_opt:
       - no-new-privileges:true
