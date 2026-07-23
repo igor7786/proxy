@@ -21,9 +21,6 @@ services:
     env_file:
       - ../../project/.env
     volumes:
-      # - ../../../ca/certs/ca.crt:/app/.certs/ca.crt:ro
-      # - ../../../ca/certs/homepc.crt:/app/.certs/homepc.crt:ro
-      # - ../../../ca/certs/homepc.key:/app/.certs/homepc.key:ro
       - ./data/sqlite:/app/data/sqlite
     expose:
       - "4321"
@@ -37,7 +34,7 @@ services:
     healthcheck:
       test:
         - "CMD"
-        - "node"
+        - "bun"
         - "-e"
         - "require('net').connect(4321,'127.0.0.1').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))"
       interval: 10s

@@ -43,6 +43,7 @@ ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=4321
 ENV SQLITE_PATH=/app/data/sqlite/sqlite.db
+ENV MANIFEST_DIR=data/og-fallback
 
 
 # Ensure the mount target exists and is owned by appuser before
@@ -59,10 +60,16 @@ COPY --chown=appuser:appgroup --from=build /app/public ./public
 COPY --chown=appuser:appgroup package.json ./
 
 COPY --chown=appuser:appgroup --from=build /app/data/og-fallback ./data/og-fallback
-
+# 🌟 FIX 1: Copy tsconfig.json so Bun knows how to resolve the `@/` alias
+COPY --chown=appuser:appgroup tsconfig.json ./
+# 🌟 FIX 2: Copy the ENTIRE src directory so Bun can find your drizzle client/schema files
+COPY --chown=appuser:appgroup --from=build /app/src/lib/drizzle/sqlite ./src/lib/drizzle/sqlite
+COPY --chown=appuser:appgroup --from=build /app/src/lib/env/server.env.ts ./src/lib/env/server.env.ts
+# 🚨 ADD THIS: Copy the src directory containing your script
+COPY --chown=appuser:appgroup --from=build /app/src/scripts ./scripts
 # Switch to non-root user
 USER appuser
 
 EXPOSE 4321
 
-CMD ["bun", "run", "--bun", "./dist/server/entry.mjs"]
+CMD ["sh", "-c", "bun ./scripts/manifest.sqlite.ts && bun run --bun ./dist/server/entry.mjs"]
