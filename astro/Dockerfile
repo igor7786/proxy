@@ -33,7 +33,6 @@ RUN bun run build
 # =========================
 FROM oven/bun:1-slim AS runtime
 
-
 WORKDIR /app
 
 RUN groupadd -r -g 1500 appgroup && \
@@ -45,28 +44,26 @@ ENV PORT=4321
 ENV SQLITE_PATH=/app/data/sqlite/sqlite.db
 ENV MANIFEST_DIR=data/og-fallback
 
+# Ensure the mount target and fallback folders exist with correct ownership
+RUN mkdir -p /app/data/sqlite ./data/og-fallback && \
+    chown -R appuser:appgroup /app/data/sqlite ./data/og-fallback
 
-# Ensure the mount target exists and is owned by appuser before
-# the volume gets mounted over it — otherwise Docker may create
-# the mount point as root and appuser can't write to it.
-RUN mkdir -p /app/data/sqlite && chown -R appuser:appgroup /app/data/sqlite
-# # Copy app files with correct ownership
+# Copy app files with correct ownership
 COPY --chown=appuser:appgroup --from=prod-deps /app/node_modules ./node_modules
-
 COPY --chown=appuser:appgroup --from=build /app/dist ./dist
-
 COPY --chown=appuser:appgroup --from=build /app/public ./public
-
 COPY --chown=appuser:appgroup package.json ./
 
-COPY --chown=appuser:appgroup --from=build /app/data/og-fallback ./data/og-fallback
 # 🌟 FIX 1: Copy tsconfig.json so Bun knows how to resolve the `@/` alias
 COPY --chown=appuser:appgroup tsconfig.json ./
+
 # 🌟 FIX 2: Copy the ENTIRE src directory so Bun can find your drizzle client/schema files
 COPY --chown=appuser:appgroup --from=build /app/src/lib/drizzle/sqlite ./src/lib/drizzle/sqlite
 COPY --chown=appuser:appgroup --from=build /app/src/lib/env/server.env.ts ./src/lib/env/server.env.ts
+
 # 🚨 ADD THIS: Copy the src directory containing your script
 COPY --chown=appuser:appgroup --from=build /app/src/scripts ./scripts
+
 # Switch to non-root user
 USER appuser
 
