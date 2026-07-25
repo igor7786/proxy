@@ -23,6 +23,7 @@ RUN bun install --frozen-lockfile
 # Build app
 # =========================
 FROM build-deps AS build
+ENV NODE_ENV=production
 
 COPY . .
 
@@ -32,8 +33,10 @@ RUN bun run build
 # Runtime image
 # =========================
 FROM oven/bun:1-slim AS runtime
-
+ENV NODE_ENV=production
 WORKDIR /app
+
+
 
 RUN groupadd -r -g 1500 appgroup && \
     useradd -r -u 1500 -g appgroup appuser
@@ -41,8 +44,7 @@ RUN groupadd -r -g 1500 appgroup && \
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=4321
-ENV SQLITE_PATH=/app/data/sqlite/sqlite.db
-ENV MANIFEST_DIR=data/og-fallback
+
 
 # Ensure the mount target and fallback folders exist with correct ownership
 RUN mkdir -p /app/data/sqlite ./data/og-fallback && \
@@ -58,7 +60,10 @@ COPY --chown=appuser:appgroup package.json ./
 COPY --chown=appuser:appgroup tsconfig.json ./
 
 # 🌟 FIX 2: Copy the ENTIRE src directory so Bun can find your drizzle client/schema files
+COPY --chown=appuser:appgroup --from=build /app/src/lib/drizzle/sqlite/db ./src/lib/drizzle/sqlite/db
+# COPY --chown=appuser:appgroup --from=build /app/src/lib/drizzle/sqlite/manifest.json ./src/lib/drizzle/sqlite/manifest.json
 COPY --chown=appuser:appgroup --from=build /app/src/lib/drizzle/sqlite ./src/lib/drizzle/sqlite
+
 COPY --chown=appuser:appgroup --from=build /app/src/lib/env/server.env.ts ./src/lib/env/server.env.ts
 
 # 🚨 ADD THIS: Copy the src directory containing your script

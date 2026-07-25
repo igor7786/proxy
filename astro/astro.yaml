@@ -21,7 +21,7 @@ services:
     env_file:
       - ../../project/.env
     volumes:
-      - ./data/sqlite:/app/data/sqlite
+      - ../../project/src/lib/drizzle/sqlite/db:/app/src/lib/drizzle/sqlite/db
     expose:
       - "4321"
     networks:
