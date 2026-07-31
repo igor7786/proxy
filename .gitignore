@@ -740,8 +740,11 @@ GIT.txt
 **/datasources
 **/prometheus_grafana/data
 **/prometheus_grafana/prometheus_data
+### PG ###
 **/tls
 **/pg/data
+**/pg/pgbouncer
+**/pg/config
 ### Sqlite ###
 **/astro/data/sqlite/sqlite.db-shm
 **/astro/data/sqlite/sqlite.db-wal

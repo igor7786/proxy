@@ -21,8 +21,8 @@ services:
       - "19093:19093"
       - "29093:29093"
       - "39093:39093"
-      # postgres
-      - "5432:5432"
+      # pgbouncer
+      - "6432:6432"
     depends_on:
       # console:
       #   condition: service_healthy

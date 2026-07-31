@@ -25,8 +25,6 @@ services:
       - ./tls/postgres-server.key:/etc/postgresql-certs/postgres-server.key:ro
       - ./tls/ca.crt:/etc/postgresql-certs/ca.crt:ro
       - ./config/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
-    ports:
-    - "5433:5432"
     healthcheck:
       interval: 30s
       retries: 5
@@ -34,6 +32,41 @@ services:
       test:
         - CMD-SHELL
         - pg_isready -U ${PG_ADMIN_USER:?admin user required} -d ${PG_DB:?database name required}
+      timeout: 5s
+    networks:
+      - internal
+
+  pgbouncer:
+    container_name: pgbouncer
+    image: docker.io/edoburu/pgbouncer:v1.25.2-p0
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      # tell edoburu entrypoint not to touch config — DB_HOST must be set to something
+      # but since pgbouncer.ini already exists, it won't override it
+      DB_HOST: postgresql
+      DB_USER: ${PG_ADMIN_USER}
+      DB_PASSWORD: ${PG_ADMIN_PASS}
+      DB_NAME: ${PG_DB}
+    volumes:
+      - ./pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
+      - ./pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt
+      - ./tls/ca.crt:/etc/pgbouncer-certs/ca.crt:ro
+      - ./tls/pgbouncer-server.crt:/etc/pgbouncer-certs/pgbouncer-server.crt:ro
+      - ./tls/pgbouncer-server.key:/etc/pgbouncer-certs/pgbouncer-server.key:ro
+    ports:
+      - "6433:6432"
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    healthcheck:
+      interval: 30s
+      retries: 5
+      start_period: 10s
+      test:
+        - CMD-SHELL
+        - psql "host=/tmp port=6432 dbname=pgbouncer user=pgbouncer_admin password=healthcheckpassword" -c "SHOW VERSION;" || exit 1
       timeout: 5s
     networks:
       - internal

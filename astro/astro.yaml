@@ -9,7 +9,7 @@ services:
     depends_on:
       dragonfly:
         condition: service_healthy
-      postgresql:
+      pgbouncer:
         condition: service_healthy
       rustfs:
         condition: service_healthy
