@@ -16,7 +16,7 @@ services:
     env_file:
       - ../.env
     environment:
-      POSTGRES_USER: ${PG_ADMIN_USER}
+      POSTGRES_USER: ${PG_ADMIN_USER:?admin user required}
       POSTGRES_PASSWORD: ${PG_ADMIN_PASS:?admin password required}
     volumes:
       - ./data:/var/lib/postgresql/data
@@ -66,7 +66,7 @@ services:
       start_period: 10s
       test:
         - CMD-SHELL
-        - psql "host=/tmp port=6432 dbname=pgbouncer user=pgbouncer_admin password=healthcheckpassword" -c "SHOW VERSION;" || exit 1
+        - psql "host=/tmp port=6432 dbname=pgbouncer user=${PGB_ADMIN_USER:?pgbouncer admin user required} password=${PGB_ADMIN_PASS:?pgbouncer admin password required}" -c "SHOW VERSION;" || exit 1
       timeout: 5s
     networks:
       - internal
