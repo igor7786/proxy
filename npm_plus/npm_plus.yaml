@@ -22,7 +22,7 @@ services:
       - "29093:29093"
       - "39093:39093"
       # pgbouncer
-      - "6432:6432"
+      - "6433:6433"
     depends_on:
       # console:
       #   condition: service_healthy

@@ -3,6 +3,8 @@ services:
     container_name: postgresql
     image: docker.io/library/postgres:17.9
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     command:
       - postgres
       - -c
@@ -25,6 +27,8 @@ services:
       - ./tls/postgres-server.key:/etc/postgresql-certs/postgres-server.key:ro
       - ./tls/ca.crt:/etc/postgresql-certs/ca.crt:ro
       - ./config/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
+    ports:
+      - "5432:5432"
     healthcheck:
       interval: 30s
       retries: 5
@@ -40,6 +44,8 @@ services:
     container_name: pgbouncer
     image: docker.io/edoburu/pgbouncer:v1.25.2-p0
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     env_file:
       - ../.env
     environment:
@@ -56,7 +62,7 @@ services:
       - ./tls/pgbouncer-server.crt:/etc/pgbouncer-certs/pgbouncer-server.crt:ro
       - ./tls/pgbouncer-server.key:/etc/pgbouncer-certs/pgbouncer-server.key:ro
     ports:
-      - "6433:6432"
+      - "6432:6432"
     depends_on:
       postgresql:
         condition: service_healthy
