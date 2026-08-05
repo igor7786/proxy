@@ -36,19 +36,25 @@ FROM oven/bun:1-slim AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 
-
-
-RUN groupadd -r -g 1500 appgroup && \
-    useradd -r -u 1500 -g appgroup appuser
-
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=4321
 
+RUN groupadd -r -g 1500 appgroup && \
+    useradd -r -u 1500 -g appgroup appuser
 
-# Ensure the mount target and fallback folders exist with correct ownership
-RUN mkdir -p /app/data/sqlite ./data/og-fallback && \
-    chown -R appuser:appgroup /app/data/sqlite ./data/og-fallback
+# Create directories that will be mounted or used at runtime
+RUN mkdir -p \
+    /app/.certs \
+    /app/data/sqlite \
+    /app/data/og-fallback \
+    /app/src/lib/drizzle/sqlite/db && \
+    chown -R appuser:appgroup /app
+
+
+# # Ensure the mount target and fallback folders exist with correct ownership
+# RUN mkdir -p /app/data/sqlite ./data/og-fallback && \
+#     chown -R appuser:appgroup /app/data/sqlite ./data/og-fallback
 
 # Copy app files with correct ownership
 COPY --chown=appuser:appgroup --from=prod-deps /app/node_modules ./node_modules

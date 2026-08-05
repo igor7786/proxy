@@ -21,6 +21,9 @@ services:
     env_file:
       - ../../project/.env
     volumes:
+      - ./certs/ca.crt:/app/.certs/ca.crt:ro
+      - ./certs/homepc.crt:/app/.certs/homepc.crt:ro
+      - ./certs/homepc.key:/app/.certs/homepc.key:ro
       - ../../project/src/lib/drizzle/sqlite/db:/app/src/lib/drizzle/sqlite/db
     expose:
       - "4321"

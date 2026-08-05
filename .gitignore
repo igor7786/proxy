@@ -748,7 +748,8 @@ GIT.txt
 ### Sqlite ###
 **/astro/data/sqlite/sqlite.db-shm
 **/astro/data/sqlite/sqlite.db-wal
-
+### Astro ###
+**/astro/certs
 ### exclude ###
 !/scripts/
 !/scripts/deploy.sh
