@@ -5,16 +5,6 @@ services:
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
-    command:
-      - postgres
-      - -c
-      - ssl=on
-      - -c
-      - ssl_cert_file=/etc/postgresql-certs/postgres-server.crt
-      - -c
-      - ssl_key_file=/etc/postgresql-certs/postgres-server.key
-      - -c
-      - ssl_ca_file=/etc/postgresql-certs/ca.crt
     env_file:
       - ../.env
     environment:
@@ -23,9 +13,6 @@ services:
     volumes:
       - ./data:/var/lib/postgresql/data
       - ./init:/docker-entrypoint-initdb.d:ro
-      - ./tls/postgres-server.crt:/etc/postgresql-certs/postgres-server.crt:ro
-      - ./tls/postgres-server.key:/etc/postgresql-certs/postgres-server.key:ro
-      - ./tls/ca.crt:/etc/postgresql-certs/ca.crt:ro
       - ./config/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
     ports:
       - "5432:5432"
@@ -57,7 +44,9 @@ services:
       DB_NAME: ${PG_DB}
     volumes:
       - ./pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
-      - ./pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt
+      - ./pgbouncer/pgbouncer_hba.conf:/etc/pgbouncer/pgbouncer_hba.conf:ro
+      - ./pgbouncer/pg_ident.conf:/etc/pgbouncer/pg_ident.conf:ro
+      - ./pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
       - ./tls/ca.crt:/etc/pgbouncer-certs/ca.crt:ro
       - ./tls/pgbouncer-server.crt:/etc/pgbouncer-certs/pgbouncer-server.crt:ro
       - ./tls/pgbouncer-server.key:/etc/pgbouncer-certs/pgbouncer-server.key:ro
