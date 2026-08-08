@@ -39,9 +39,9 @@ services:
       # tell edoburu entrypoint not to touch config — DB_HOST must be set to something
       # but since pgbouncer.ini already exists, it won't override it
       DB_HOST: postgresql
-      DB_USER: ${PG_ADMIN_USER}
-      DB_PASSWORD: ${PG_ADMIN_PASS}
-      DB_NAME: ${PG_DB}
+      DB_USER: ${PG_ADMIN_USER:?admin user required}
+      DB_PASSWORD: ${PG_ADMIN_PASS:?admin password required}
+      DB_NAME: ${PG_DB_APP:?app database name required}
     volumes:
       - ./pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
       - ./pgbouncer/pgbouncer_hba.conf:/etc/pgbouncer/pgbouncer_hba.conf:ro
