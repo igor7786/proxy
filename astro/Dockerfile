@@ -27,6 +27,11 @@ ENV NODE_ENV=production
 
 COPY . .
 
+# Pass 1: generate the CSP manifest (routes will have wrong CSP, discarded)
+RUN bun run build
+
+# Pass 2: middleware now reads a manifest that already exists on disk,
+# so prerendered output gets the correct CSP baked in
 RUN bun run build
 
 # =========================
@@ -75,6 +80,9 @@ COPY --chown=appuser:appgroup --from=build /app/src/lib/env/server.env.ts ./src/
 # 🚨 ADD THIS: Copy the src directory containing your script
 COPY --chown=appuser:appgroup --from=build /app/src/scripts ./scripts
 
+# 🌟 FIX: manifest.ts reads this from disk at runtime — must be copied explicitly
+COPY --chown=appuser:appgroup --from=build /app/src/plugins/csp-manifest.json ./src/plugins/csp-manifest.json
+COPY --chown=appuser:appgroup --from=build /app/src/lib/helpers/theme-checker.js ./src/lib/helpers/theme-checker.js
 # Switch to non-root user
 USER appuser
 
