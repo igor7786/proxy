@@ -56,11 +56,6 @@ RUN mkdir -p \
     /app/src/lib/drizzle/sqlite/db && \
     chown -R appuser:appgroup /app
 
-
-# # Ensure the mount target and fallback folders exist with correct ownership
-# RUN mkdir -p /app/data/sqlite ./data/og-fallback && \
-#     chown -R appuser:appgroup /app/data/sqlite ./data/og-fallback
-
 # Copy app files with correct ownership
 COPY --chown=appuser:appgroup --from=prod-deps /app/node_modules ./node_modules
 COPY --chown=appuser:appgroup --from=build /app/dist ./dist
@@ -72,20 +67,16 @@ COPY --chown=appuser:appgroup tsconfig.json ./
 
 # 🌟 FIX 2: Copy the ENTIRE src directory so Bun can find your drizzle client/schema files
 COPY --chown=appuser:appgroup --from=build /app/src/lib/drizzle/sqlite/db ./src/lib/drizzle/sqlite/db
-# COPY --chown=appuser:appgroup --from=build /app/src/lib/drizzle/sqlite/manifest.json ./src/lib/drizzle/sqlite/manifest.json
 COPY --chown=appuser:appgroup --from=build /app/src/lib/drizzle/sqlite ./src/lib/drizzle/sqlite
 
 COPY --chown=appuser:appgroup --from=build /app/src/lib/env/server.env.ts ./src/lib/env/server.env.ts
 
-# 🚨 ADD THIS: Copy the src directory containing your script
-COPY --chown=appuser:appgroup --from=build /app/src/scripts ./scripts
+# 🚨 ADD THIS: Copy themechecker
 
-# 🌟 FIX: manifest.ts reads this from disk at runtime — must be copied explicitly
-COPY --chown=appuser:appgroup --from=build /app/src/plugins/csp-manifest.json ./src/plugins/csp-manifest.json
 COPY --chown=appuser:appgroup --from=build /app/src/lib/helpers/theme-checker.js ./src/lib/helpers/theme-checker.js
 # Switch to non-root user
 USER appuser
 
 EXPOSE 4321
 
-CMD ["sh", "-c", "bun ./scripts/manifest.sqlite.ts && bun run --bun ./dist/server/entry.mjs"]
+CMD ["sh", "-c", "bun run --bun ./dist/server/entry.mjs"]
