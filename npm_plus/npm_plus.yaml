@@ -62,6 +62,7 @@ services:
     volumes:
       - ./npm_plus_data:/data
       - ../geoipupdate/geo_data/goaccess/geoip:/usr/share/GeoIP:ro
+      - ./npm_plus_data/custom_nginx/proxy-headers.conf:/usr/local/nginx/conf/proxy-headers.conf
       # for static file have to be uncoment
       # - ../../project/dist/client:/var/www/astro-static:ro
       # - ../npm/npm_letsencrypt:/etc/letsencrypt
