@@ -729,6 +729,7 @@ GIT.txt
 **/dragonfly_db/dragonfly_data
 **/geoipupdate/geo_data
 **/npm_plus/npm_plus_data
+**/npm_plus/ngnix-errors
 **/redisinsight/redisinsight-data
 **/authentik/certs
 **/authentik/custom-templates
