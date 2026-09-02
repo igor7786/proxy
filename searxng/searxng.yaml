@@ -1,0 +1,37 @@
+services:
+  searxng:
+    image: searxng/searxng:latest
+    container_name: searxng
+    ports:
+      - "8089:8080"
+    networks:
+      - internal
+    volumes:
+      - ./settings:/etc/searxng:rw
+    env_file:
+      - ../.env
+    environment:
+      - SEARXNG_BASE_URL=${SEARXNG_BASE_URL:?base url required}
+    restart: unless-stopped
+
+    # 🔒 Advanced Container Hardening Elements
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+
+    # 📝 Log Rotation Controls (Prevents logs from eating VPS storage)
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s

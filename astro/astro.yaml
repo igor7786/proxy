@@ -15,6 +15,8 @@ services:
         condition: service_healthy
       console:
         condition: service_healthy
+      searxng:
+        condition: service_healthy
       # - npmplus
     security_opt:
       - no-new-privileges:true

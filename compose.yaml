@@ -13,6 +13,7 @@ include:
   - rust_fs/rust.fs.yaml
   - redpanda/redpanda.yaml
   - pg/pg.yaml
+  - searxng/searxng.yaml
 
 networks:
   # internal services

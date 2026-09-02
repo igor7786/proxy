@@ -1,0 +1,58 @@
+# Use internal base defaults so nothing crashes
+use_default_settings: true
+
+# SearXNG Server Settings
+server:
+  port: 8080
+  bind_address: "0.0.0.0"
+  base_url: "${SEARXNG_BASE_URL}"   # Injected from your central .env file
+  secret_key: "${SEARXNG_SECRET_KEY}" # Injected from your central .env file
+
+# SearXNG Search Preferences
+search:
+  safe_search: 0
+  autocomplete: ""
+  formats:
+    - html
+    - json
+  ban_time_on_fail: 5
+  max_ban_time_on_fail: 120
+  suspended_times:
+    SearxEngineAccessDenied: 86400
+    SearxEngineCaptcha: 86400
+
+# Privacy protections
+privacy:
+  useragent_reg: true
+
+# Out-of-the-box Defaults Needed by Flask Engine
+general:
+  debug: false
+  instance_name: "SearXNG"
+
+# Target Search Engines
+engines:
+  - name: duckduckgo
+    engine: duckduckgo
+    disabled: true
+
+  - name: google
+    engine: google
+    shortcut: g
+    timeout: 5.0
+    disabled: false
+
+  - name: brave
+    engine: brave
+    shortcut: br
+    timeout: 4.0
+    disabled: false
+    # 👈 This line passes your secure API key from your .env file down to the engine
+    api_key: "${BRAVE_API_KEY}"
+
+  - name: github
+    engine: github
+    shortcut: gh
+    timeout: 5.0
+    disabled: false
+    api_key: "${GITHUB_API_KEY}" # Injected from your central .env file
