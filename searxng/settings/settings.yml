@@ -36,6 +36,26 @@ engines:
     engine: duckduckgo
     disabled: true
 
+  - name: startpage
+    engine: startpage
+    disabled: true
+
+  - name: google cse
+    engine: google_cse
+    disabled: true
+
+  - name: ahmia
+    engine: ahmia
+    disabled: true
+
+  - name: torch
+    engine: torch
+    disabled: true
+
+  - name: wikidata
+    engine: wikidata
+    timeout: 8.0
+
   - name: google
     engine: google
     shortcut: g
@@ -47,7 +67,6 @@ engines:
     shortcut: br
     timeout: 4.0
     disabled: false
-    # 👈 This line passes your secure API key from your .env file down to the engine
     api_key: "${BRAVE_API_KEY}"
 
   - name: github
@@ -55,4 +74,4 @@ engines:
     shortcut: gh
     timeout: 5.0
     disabled: false
-    api_key: "${GITHUB_API_KEY}" # Injected from your central .env file
+    api_key: "${GITHUB_API_KEY}"

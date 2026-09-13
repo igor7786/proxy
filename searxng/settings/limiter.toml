@@ -1,0 +1,10 @@
+# ./settings/limiter.toml
+[botdetection]
+trusted_proxies = [
+  "172.16.0.0/12",   # covers default Docker bridge ranges incl. your 172.19.x.x subnet
+  "127.0.0.0/8",
+  "::1"
+]
+
+[botdetection.ip_limit]
+link_token = true
