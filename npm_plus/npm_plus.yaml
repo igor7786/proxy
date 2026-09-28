@@ -23,6 +23,8 @@ services:
       - "39093:39093"
       # pgbouncer
       - "6433:6433"
+      # oracle
+      - "4443:4443/tcp"
     depends_on:
       astro:
         condition: service_healthy
