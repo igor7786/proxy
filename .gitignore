@@ -741,6 +741,7 @@ GIT.txt
 **/datasources
 **/prometheus_grafana/data
 **/prometheus_grafana/prometheus_data
+**/3xui/xray
 ### PG ###
 **/tls
 **/pg/data

@@ -1,0 +1,15 @@
+services:
+  3xui:
+    container_name: 3xui
+    image: ghcr.io/mhsanaei/3x-ui:v3.9.0
+    restart: unless-stopped
+    environment:
+      XUI_ENABLE_FAIL2BAN: "true"
+    ports:
+      - "127.0.0.1:2053:2053"
+      - "0.0.0.0:9843:9843/tcp"
+    volumes:
+      - ./xray/3xui_data/db:/etc/x-ui
+      - ./xray/3xui_data/cert:/root/cert
+    networks:
+      proxy:

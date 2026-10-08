@@ -17,7 +17,7 @@ services:
         condition: service_healthy
       searxng:
         condition: service_healthy
-      # - npmplus
+     # - npmplus
     security_opt:
       - no-new-privileges:true
     env_file:
