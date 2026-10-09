@@ -26,6 +26,7 @@ services:
       # oracle
       - "4443:4443/tcp"
       - "4443:4443/udp"
+      - "5443:5443/udp"
     depends_on:
       astro:
         condition: service_healthy
