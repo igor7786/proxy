@@ -15,7 +15,7 @@ include:
   - pg/pg.yaml
   - searxng/searxng.yaml
   - 3xui/3xui.yaml
-
+  - crowdsec_ui/crowdsec_ui.yaml
 networks:
   # internal services
   internal:

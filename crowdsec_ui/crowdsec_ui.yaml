@@ -1,0 +1,43 @@
+services:
+  crowdsec-web-ui:
+    image: ghcr.io/theduffman85/crowdsec-web-ui:latest   # pinned; bump deliberately
+    container_name: crowdsec-web-ui
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      CONFIG_INSTANCE_LAPI_URL: ${CONFIG_INSTANCE_LAPI_URL}
+      CONFIG_INSTANCE_LAPI_AUTH_USERNAME: ${CONFIG_INSTANCE_LAPI_AUTH_USERNAME}
+      CONFIG_INSTANCE_LAPI_AUTH_PASSWORD: ${CONFIG_INSTANCE_LAPI_AUTH_PASSWORD}
+      # Write access (ban/unban) is on because PERMISSION_READ_ONLY is not set.
+    ports:
+        - "127.0.0.1:3000:3000"
+    volumes:
+      - ./data:/app/data
+
+    # No `ports:` on purpose. In NPMplus use:
+    #   Forward Hostname: crowdsec-web-ui   Forward Port: 3000
+    # For a quick local test only, temporarily add:
+    #   ports:
+    #     - "127.0.0.1:3000:3000"
+
+    networks:
+      - internal
+
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+      - DAC_OVERRIDE
+      - FOWNER
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+

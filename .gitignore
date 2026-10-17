@@ -742,6 +742,7 @@ GIT.txt
 **/prometheus_grafana/data
 **/prometheus_grafana/prometheus_data
 **/3xui/xray
+**/crowdsec_ui/data
 ### PG ###
 **/tls
 **/pg/data
