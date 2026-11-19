@@ -45,5 +45,3 @@ services:
       start_period: 15s
     deploy:
       replicas: 3
-      restart_policy:
-        condition: on-failure
